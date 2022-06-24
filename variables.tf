@@ -29,10 +29,10 @@ variable "replication_token" {
   default = ""
 }
 
-variable "public_availability_zone" {
-  type = string
-  default = "us-east-1a"
-  description = "The AZ to make a public subnet in"
+variable "public_availability_zones" {
+  type = list(string)
+  default = ["us-east-1a", "us-east-1b"]
+  description = "The AZs to make public subnets in"
 }
 
 variable "common_tag" {
@@ -100,7 +100,7 @@ variable "key_name" {
 
 variable "server_instance_type" {
   type    = string
-  default = "t2.micro"
+  default = "t2.small"
 }
 
 variable "client_instance_type" {
@@ -115,7 +115,7 @@ variable "desired_servers" {
 
 variable "desired_clients" {
   type    = number
-  default = 2
+  default = 1
 }
 
 variable "max_servers" {

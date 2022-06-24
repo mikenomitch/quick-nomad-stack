@@ -30,21 +30,11 @@ locals {
     {}
   )
 
-  consul_template_service_config = templatefile(
-    "${path.module}/templates/services/consul_template.service.tpl",
-    {}
-  )
-
   // serivce setup files
 
   docker_config = templatefile(
     "${path.module}/templates/docker.sh.tpl",
     {}
-  )
-
-  consul_template_config = templatefile(
-    "${path.module}/templates/consul_template.sh.tpl",
-    { consul_template_service_config = local.consul_template_service_config }
   )
 
   nomad_server_config = templatefile(
@@ -58,9 +48,7 @@ locals {
   )
 
   launch_base_user_data = merge(local.base_config_values, {
-    consul_template_config         = local.consul_template_config
     docker_config                  = local.docker_config
-    consul_template_service_config = local.consul_template_service_config
   })
 }
 
@@ -77,9 +65,11 @@ resource "aws_vpc" "nomadstack" {
 }
 
 resource "aws_subnet" "public" {
+  count = 2
+
   vpc_id                  = aws_vpc.nomadstack.id
-  cidr_block              = "10.0.100.0/24"
-  availability_zone       = var.public_availability_zone
+  cidr_block              = "10.0.10${count.index}.0/24"
+  availability_zone       = var.public_availability_zones[count.index]
   map_public_ip_on_launch = true
 
   tags = local.common_tags
@@ -87,7 +77,6 @@ resource "aws_subnet" "public" {
 
 resource "aws_internet_gateway" "nomadstack" {
   vpc_id = aws_vpc.nomadstack.id
-
   tags = local.common_tags
 }
 
@@ -105,7 +94,7 @@ resource "aws_route_table" "nomadstack" {
 
 resource "aws_route_table_association" "main" {
   count          = 2
-  subnet_id      = aws_subnet.public.id
+  subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.nomadstack.id
 }
 
@@ -169,23 +158,23 @@ resource "aws_autoscaling_group" "servers" {
 
   target_group_arns = [ aws_alb_target_group.nomad_servers.arn ]
 
-  tags = [
-    {
-      key                 = "Name"
-      value               = "${var.cluster_name}-server"
-      propagate_at_launch = true
-    },
-    {
-      key                 = var.retry_join.tag_key
-      value               = "${var.retry_join.tag_value_prefix}-${var.cluster_name}"
-      propagate_at_launch = true
-    },
-    {
-      key                 = "Use"
-      value               = var.common_tag
-      propagate_at_launch = true
-    }
-  ]
+  tag {
+    key                 = "Name"
+    value               = "${var.cluster_name}-server"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = var.retry_join.tag_key
+    value               = "${var.retry_join.tag_value_prefix}-${var.cluster_name}"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Use"
+    value               = var.common_tag
+    propagate_at_launch = true
+  }
 }
 
 resource "aws_autoscaling_group" "clients" {
@@ -200,23 +189,23 @@ resource "aws_autoscaling_group" "clients" {
     aws_alb_target_group.nomad_clients.arn
   ]
 
-  tags = [
-    {
-      key                 = "Name"
-      value               = "${var.cluster_name}-client"
-      propagate_at_launch = true
-    },
-    {
-      key                 = var.retry_join.tag_key
-      value               = "${var.retry_join.tag_value_prefix}-${var.cluster_name}"
-      propagate_at_launch = true
-    },
-    {
-      key                 = "Use"
-      value               = var.common_tag
-      propagate_at_launch = true
-    }
-  ]
+  tag {
+    key                 = "Name"
+    value               = "${var.cluster_name}-client"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = var.retry_join.tag_key
+    value               = "${var.retry_join.tag_value_prefix}-${var.cluster_name}"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Use"
+    value               = var.common_tag
+    propagate_at_launch = true
+  }
 }
 
 # LOAD BALANCING
@@ -264,7 +253,7 @@ resource "aws_alb_listener" "nomad_servers" {
 
 resource "aws_autoscaling_attachment" "nomad_servers" {
   autoscaling_group_name = aws_autoscaling_group.servers.id
-  alb_target_group_arn   = aws_alb_target_group.nomad_servers.arn
+  lb_target_group_arn   = aws_alb_target_group.nomad_servers.arn
 }
 
 # LOAD BALANCING - NOMAD CLIENTS
@@ -323,7 +312,7 @@ resource "aws_alb_listener" "nomad_clients" {
 
 resource "aws_autoscaling_attachment" "nomad_clients" {
   autoscaling_group_name = aws_autoscaling_group.clients.id
-  alb_target_group_arn   = aws_alb_target_group.nomad_clients.arn
+  lb_target_group_arn   = aws_alb_target_group.nomad_clients.arn
 }
 
 # NOTE: This load balancer is meant to expose a load balancer
@@ -367,7 +356,7 @@ resource "aws_alb_listener" "nomad_clients_lb" {
 
 resource "aws_autoscaling_attachment" "nomad_clients_lb" {
   autoscaling_group_name = aws_autoscaling_group.clients.id
-  alb_target_group_arn   = aws_alb_target_group.nomad_clients_lb.arn
+  lb_target_group_arn   = aws_alb_target_group.nomad_clients_lb.arn
 }
 
 

@@ -2,14 +2,19 @@
 
 set -e
 
-echo "========================"
-echo "=== Setting up Nomad ==="
-echo "========================"
+echo "========================================="
+echo "=== Setting up Nomad and Dependencies ==="
+echo "========================================="
 
 sudo apt-get -yqq update
 sudo apt-get -yqq install apt-transport-https ca-certificates curl gnupg-agent software-properties-common unzip jq
 
-PRIVATE_IP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
+echo "=== Finished Installing Apt Deps ==="
+
+echo "=== Sleeping ==="
+// TODO: Figure out why this is necessary
+sleep 30
+echo "=== Finished Sleeping ==="
 
 if [ ${use_docker} == true ] || [ ${use_docker} == 1 ]; then
   echo "=============="
@@ -18,21 +23,12 @@ if [ ${use_docker} == true ] || [ ${use_docker} == 1 ]; then
   ${docker_config}
 fi
 
-echo "======================="
-echo "=== Consul Template ==="
-echo "======================="
-${consul_template_config}
-
 echo "============="
 echo "=== Nomad ==="
 echo "============="
 ${nomad_config}
 
 sudo systemctl daemon-reload
-
-echo "=== Starting Consul Template ==="
-sudo systemctl enable consul-template.service
-sudo systemctl start consul-template.service
 
 echo "=== Starting Nomad ==="
 sudo systemctl enable nomad.service
