@@ -1,6 +1,9 @@
 #!/bin/bash
 
-set -e
+set -ex
+
+// prevent waiting for human input
+export DEBIAN_FRONTEND=noninteractive
 
 echo "========================================="
 echo "=== Setting up Nomad and Dependencies ==="
@@ -11,21 +14,13 @@ sudo apt-get -yqq install apt-transport-https ca-certificates curl gnupg-agent s
 
 echo "=== Finished Installing Apt Deps ==="
 
-echo "=== Sleeping ==="
-// TODO: Figure out why this is necessary
-sleep 30
-echo "=== Finished Sleeping ==="
+echo "=== Getting Docker ==="
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get -yqq update
+sudo apt-get -yqq install docker-ce
 
-if [ ${use_docker} == true ] || [ ${use_docker} == 1 ]; then
-  echo "=============="
-  echo "=== Docker ==="
-  echo "=============="
-  ${docker_config}
-fi
-
-echo "============="
 echo "=== Nomad ==="
-echo "============="
 ${nomad_config}
 
 sudo systemctl daemon-reload

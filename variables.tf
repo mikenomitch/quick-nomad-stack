@@ -5,13 +5,6 @@ variable "nomad_version" {
   default = "1.3.1"
 }
 
-// == TOOLS AND DRIVERS ==
-
-variable "use_docker" {
-  type    = bool
-  default = true
-}
-
 // == HIGH LEVEL AWS INFO ==
 
 variable "region" {

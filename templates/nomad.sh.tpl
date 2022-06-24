@@ -29,6 +29,10 @@ server {
   bootstrap_expect = ${desired_servers}
   authoritative_region = "${authoritative_region}"
 
+  server_join {
+    retry_join = [ "provider=aws tag_key=${retry_tag_key} tag_value=${retry_tag_value}" ]
+  }
+
   default_scheduler_config {
     memory_oversubscription_enabled = true
 
@@ -76,6 +80,10 @@ client {
     "driver.raw_exec.enable" = "1"
     "docker.privileged.enabled" = "true"
     "docker.volumes.enabled" = "true"
+  }
+
+  server_join {
+    retry_join = [ "provider=aws tag_key=${retry_tag_key} tag_value=${retry_tag_value}" ]
   }
 }
 

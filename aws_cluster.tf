@@ -2,7 +2,6 @@ locals {
   // general config values
 
   base_config_values = {
-    use_docker           = var.use_docker
     datacenter           = var.region
     region               = var.region
     authoritative_region = var.authoritative_region
@@ -32,11 +31,6 @@ locals {
 
   // serivce setup files
 
-  docker_config = templatefile(
-    "${path.module}/templates/docker.sh.tpl",
-    {}
-  )
-
   nomad_server_config = templatefile(
     "${path.module}/templates/nomad.sh.tpl",
     merge(local.nomad_base_config, { is_server = true })
@@ -47,9 +41,7 @@ locals {
     merge(local.nomad_base_config, { is_server = false })
   )
 
-  launch_base_user_data = merge(local.base_config_values, {
-    docker_config                  = local.docker_config
-  })
+  launch_base_user_data = local.base_config_values
 }
 
 # VPC AND SUBNETS
