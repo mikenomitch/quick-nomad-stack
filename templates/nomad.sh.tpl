@@ -83,14 +83,6 @@ acl {
   enabled = true
 }
 
-plugin "nomad-driver-ecs" {
-  config {
-    enabled = true
-    cluster = "nomad-remote-driver-cluster"
-    region  = "us-east-1"
-  }
-}
-
 plugin "docker" {
   config {
     allow_privileged = true

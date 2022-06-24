@@ -77,11 +77,9 @@ resource "aws_vpc" "nomadstack" {
 }
 
 resource "aws_subnet" "public" {
-  count = 2
-
   vpc_id                  = aws_vpc.nomadstack.id
-  cidr_block              = "10.0.10${count.index}.0/24"
-  availability_zone       = var.availability_zones[var.region][count.index]
+  cidr_block              = "10.0.100.0/24"
+  availability_zone       = var.public_availability_zone
   map_public_ip_on_launch = true
 
   tags = local.common_tags
@@ -107,7 +105,7 @@ resource "aws_route_table" "nomadstack" {
 
 resource "aws_route_table_association" "main" {
   count          = 2
-  subnet_id      = aws_subnet.public[count.index].id
+  subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.nomadstack.id
 }
 

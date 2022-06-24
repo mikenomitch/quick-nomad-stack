@@ -29,15 +29,10 @@ variable "replication_token" {
   default = ""
 }
 
-variable "availability_zones" {
-  type = map(any)
-
-  default = {
-    "us-east-1" = ["us-east-1a"],
-    "us-west-2" = ["us-west-2a"]
-  }
-
-  description = "The AZs to make subnets on for any given cloud region"
+variable "public_availability_zone" {
+  type = string
+  default = "us-east-1a"
+  description = "The AZ to make a public subnet in"
 }
 
 variable "common_tag" {
