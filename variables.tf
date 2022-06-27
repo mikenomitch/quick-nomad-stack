@@ -61,7 +61,12 @@ variable "http_port_to" {
   default = "65535"
 }
 
-variable "nomad_client_appliicaton_port" {
+variable "nomad_client_lb_port" {
+  type = number
+  default = 80
+}
+
+variable "nomad_client_lb_ui_port" {
   type = number
   default = 8080
 }

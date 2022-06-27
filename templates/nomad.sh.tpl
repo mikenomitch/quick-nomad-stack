@@ -64,23 +64,26 @@ telemetry {
 EOF
 else
   echo "=== Setting up Nomad as Client ==="
+  sudo mkdir -p /opt/nomad/plugins
+  sudo mkdir -p /opt/cni/bin
+  # sudo mkdir -p /tmp/cni
+  # curl https://github.com/containernetworking/plugins/releases/download/v1.0.1/cni-plugins-linux-amd64-v1.0.1.tgz --output /tmp/cni/cni-plugins-linux-amd64-v1.0.1.tgz
+  # tar -xf /tmp/cni/cni-plugins-linux-amd64-v1.0.1.tgz -C /tmp/cni
+  # mv "/tmp/cni/*" "/opt/cni/bin"
+  # tar -xf /tmp/cni-plugin
+
   echo "=== Writing Client Config ==="
 
   sudo tee /etc/nomad.d/config.hcl > /dev/null <<EOF
 datacenter = "${datacenter}"
 region     = "${region}"
 data_dir   = "/mnt/nomad"
+plugin_dir = "/opt/nomad/plugins"
 
 bind_addr = "0.0.0.0"
 
 client {
   enabled = true
-
-  options = {
-    "driver.raw_exec.enable" = "1"
-    "docker.privileged.enabled" = "true"
-    "docker.volumes.enabled" = "true"
-  }
 
   server_join {
     retry_join = [ "provider=aws tag_key=${retry_tag_key} tag_value=${retry_tag_value}" ]
@@ -88,6 +91,10 @@ client {
 }
 
 acl {
+  enabled = true
+}
+
+plugin "raw_exec" {
   enabled = true
 }
 

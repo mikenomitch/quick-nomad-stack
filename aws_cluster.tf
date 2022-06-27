@@ -178,7 +178,7 @@ resource "aws_autoscaling_group" "clients" {
   vpc_zone_identifier  = aws_subnet.public.*.id
 
   target_group_arns = [
-    aws_alb_target_group.nomad_clients.arn
+    aws_alb_target_group.nomad_clients_lb.arn
   ]
 
   tag {
@@ -250,69 +250,7 @@ resource "aws_autoscaling_attachment" "nomad_servers" {
 
 # LOAD BALANCING - NOMAD CLIENTS
 
-# NOTE: The first LB and associated resouces are to get to
-# the Nomad UI on the clients. When attached, this makes TF wait
-# for a healthy state for the client ASG until it completes.
-
-# This might not be necessary, but there may be some reason you
-# would want to get to the Nomad client UI, and I'm keeping it
-# as an easy way to block on the client ASG & Nomad health.
-
-# Scroll down for the other Nomad Client ASG which is meant
-# for exposing load balancers or applications to the public.
-
-resource "aws_alb" "nomad_clients" {
-  name            = "${var.cluster_name}-nomad-clients"
-  security_groups = [aws_security_group.nomadstack.id]
-  subnets         = aws_subnet.public.*.id
-  internal        = false
-  idle_timeout    = 60
-
-  tags = local.common_tags
-}
-
-resource "aws_alb_target_group" "nomad_clients" {
-  name     = "${var.cluster_name}-nomad-clients"
-  port     = 4646
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.nomadstack.id
-
-  health_check {
-    healthy_threshold   = 3
-    unhealthy_threshold = 10
-    timeout             = 5
-    interval            = 10
-    path                = "/v1/agent/health"
-    port                = 4646
-  }
-
-  tags = local.common_tags
-}
-
-resource "aws_alb_listener" "nomad_clients" {
-  load_balancer_arn = aws_alb.nomad_clients.arn
-  port              = 80
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_alb_target_group.nomad_clients.arn
-  }
-
-  tags = local.common_tags
-}
-
-resource "aws_autoscaling_attachment" "nomad_clients" {
-  autoscaling_group_name = aws_autoscaling_group.clients.id
-  lb_target_group_arn   = aws_alb_target_group.nomad_clients.arn
-}
-
-# NOTE: This load balancer is meant to expose a load balancer
-# on the clients to the general public.
-
-# It does not have a health check associated with it, as
-# the Nomad job to configure a load balances has likely
-# not been deployed yet.
+/* Client Workload Load Balancer */
 
 resource "aws_alb" "nomad_clients_lb" {
   name            = "${var.cluster_name}-nomad-clients-lb"
@@ -326,7 +264,7 @@ resource "aws_alb" "nomad_clients_lb" {
 
 resource "aws_alb_target_group" "nomad_clients_lb" {
   name     = "${var.cluster_name}-nomad-clients-lb"
-  port     = var.nomad_client_appliicaton_port // 8080 default
+  port     = var.nomad_client_lb_port // 80 default
   protocol = "HTTP"
   vpc_id   = aws_vpc.nomadstack.id
 
@@ -351,6 +289,44 @@ resource "aws_autoscaling_attachment" "nomad_clients_lb" {
   lb_target_group_arn   = aws_alb_target_group.nomad_clients_lb.arn
 }
 
+/* Client Load Balancer UI */
+
+resource "aws_alb" "nomad_clients_lb_ui" {
+  name            = "${var.cluster_name}-nomad-clients-lb-ui"
+  security_groups = [aws_security_group.nomadstack.id]
+  subnets         = aws_subnet.public.*.id
+  internal        = false
+  idle_timeout    = 60
+
+  tags = local.common_tags
+}
+
+resource "aws_alb_target_group" "nomad_clients_lb_ui" {
+  name     = "${var.cluster_name}-nomad-clients-lb-ui"
+  port     = var.nomad_client_lb_ui_port
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.nomadstack.id
+
+  tags = local.common_tags
+}
+
+resource "aws_alb_listener" "nomad_clients_lb_ui" {
+  load_balancer_arn = aws_alb.nomad_clients_lb_ui.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.nomad_clients_lb_ui.arn
+  }
+
+  tags = local.common_tags
+}
+
+resource "aws_autoscaling_attachment" "nomad_clients_lb_ui" {
+  autoscaling_group_name = aws_autoscaling_group.clients.id
+  lb_target_group_arn   = aws_alb_target_group.nomad_clients_lb_ui.arn
+}
 
 # OUTPUTS
 
@@ -360,4 +336,8 @@ output "nomad_server_url" {
 
 output "nomad_client_lb_url" {
   value = "http://${aws_alb.nomad_clients_lb.dns_name}"
+}
+
+output "nomad_client_lb_ui_url" {
+  value = "http://${aws_alb.nomad_clients_lb_ui.dns_name}"
 }

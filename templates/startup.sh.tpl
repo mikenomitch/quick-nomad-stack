@@ -2,7 +2,6 @@
 
 set -ex
 
-// prevent waiting for human input
 export DEBIAN_FRONTEND=noninteractive
 
 echo "========================================="
