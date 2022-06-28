@@ -1,6 +1,6 @@
 # Quick Nomad Stack (AWS)
 
-This is Terraform configuration for setting up a simple Nomad cluster on AWS.
+This is Terraform configuration for setting up a simple [Nomad](nomadproject.io) cluster on AWS.
 
 This sets up:
 * Nomad server autoscaling group (between 1-5 nodes)
@@ -12,7 +12,7 @@ This sets up:
 
 Each node is set up as either a Nomad Server or Nomad Client with basic dependencies (i.e. curl, apt-transport-https, gnupg-agent, jq), Docker, and the Nomad binary. Nomad and Docker are both configured to launch as systemd services.
 
-See (the startup script template)[(./templates/startup.sh.tpl)] and (nomad config setup template)[(./templates/nomad.sh.tpl)] for details.
+See [the startup script template](./templates/startup.sh.tpl) and [nomad config setup template](./templates/nomad.sh.tpl) for details.
 
 ### Dependencies
 
@@ -24,10 +24,10 @@ See (the startup script template)[(./templates/startup.sh.tpl)] and (nomad confi
 
 After applying the Terraform, the Nomad Servers and
 Clients are configured to automatically find one another
-using (Cloud Auto-join functionality)[https://www.nomadproject.io/docs/configuration/server_join#cloud-auto-join].
+using [Cloud Auto-join functionality](https://www.nomadproject.io/docs/configuration/server_join#cloud-auto-join).
 
 In order to connect to your Nomad cluster, you must first
-create a (Management ACL Token)[https://learn.hashicorp.com/tutorials/nomad/access-control-tokens?in=nomad/access-control#token-types]:
+create a [Management ACL Token](https://learn.hashicorp.com/tutorials/nomad/access-control-tokens?in=nomad/access-control#token-types):
 * Copy "nomad_server_url" from `terraform output`
 * Set environment variable to connect to Nomad servers via CLI `export NOMAD_ADDR=<nomad_server_url>`
 * Create a management token `nomad acl boostrap`
