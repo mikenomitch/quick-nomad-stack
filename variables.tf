@@ -12,13 +12,6 @@ variable "region" {
   default = "us-east-1"
 }
 
-/* Not used unless multi-region Nomad is set up  */
-
-variable "replication_token" {
-  type    = string
-  default = ""
-}
-
 variable "public_availability_zones" {
   type = list(string)
   default = ["us-east-1a", "us-east-1b"]
@@ -114,6 +107,7 @@ variable "desired_servers" {
   Three is recommended for most production setups.
   One is viable but does not allow for a high availibility raft cluster.
 */
+
 variable "max_servers" {
   type    = number
   default = 3

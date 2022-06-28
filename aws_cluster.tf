@@ -4,8 +4,6 @@ locals {
   base_config_values = {
     datacenter           = var.region
     region               = var.region
-    authoritative_region = var.authoritative_region
-    replication_token    = var.replication_token
     retry_provider       = var.retry_join.provider
     retry_tag_key        = var.retry_join.tag_key
     retry_tag_value      = "${var.retry_join.tag_value_prefix}-${var.cluster_name}"

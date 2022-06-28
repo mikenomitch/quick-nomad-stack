@@ -10,6 +10,10 @@ This sets up:
 * Nomad Client load balancer for an ingress proxy admin UI
 * Related Subnets & Security groups
 
+Each node is set up as either a Nomad Server or Nomad Client with basic dependencies (i.e. curl, apt-transport-https, gnupg-agent, jq), Docker, and the Nomad binary. Nomad and Docker are both configured to launch as systemd services.
+
+See (the startup script template)[(./templates/startup.sh.tpl)] and (nomad config setup template)[(./templates/nomad.sh.tpl)] for details.
+
 ### Dependencies
 
 - Terraform 12+
