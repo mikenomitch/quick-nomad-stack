@@ -19,10 +19,11 @@ This sets up:
 ### After Terraform Apply
 
 After applying the Terraform, the Nomad Servers and
-Clients are configured to automatically find one another.
+Clients are configured to automatically find one another
+using (Cloud Auto-join functionality)[https://www.nomadproject.io/docs/configuration/server_join#cloud-auto-join].
 
 In order to connect to your Nomad cluster, you must first
-create a Management ACL Token:
+create a (Management ACL Token)[https://learn.hashicorp.com/tutorials/nomad/access-control-tokens?in=nomad/access-control#token-types]:
 * Copy "nomad_server_url" from `terraform output`
 * Set environment variable to connect to Nomad servers via CLI `export NOMAD_ADDR=<nomad_server_url>`
 * Create a management token `nomad acl boostrap`
