@@ -12,11 +12,6 @@ variable "region" {
   default = "us-east-1"
 }
 
-variable "authoritative_region" {
-  type    = string
-  default = "us-east-1"
-}
-
 /* Not used unless multi-region Nomad is set up  */
 
 variable "replication_token" {

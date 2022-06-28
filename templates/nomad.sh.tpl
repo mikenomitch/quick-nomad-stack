@@ -27,7 +27,6 @@ bind_addr = "0.0.0.0"
 server {
   enabled = true,
   bootstrap_expect = ${desired_servers}
-  authoritative_region = "${authoritative_region}"
 
   server_join {
     retry_join = [ "provider=aws tag_key=${retry_tag_key} tag_value=${retry_tag_value}" ]
@@ -46,7 +45,6 @@ server {
 
 acl {
   enabled = true
-  replication_token = "${replication_token}"
 }
 
 advertise {
