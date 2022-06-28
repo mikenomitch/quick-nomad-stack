@@ -17,6 +17,8 @@ variable "authoritative_region" {
   default = "us-east-1"
 }
 
+/* Not used unless multi-region Nomad is set up  */
+
 variable "replication_token" {
   type    = string
   default = ""
@@ -33,6 +35,20 @@ variable "common_tag" {
   default = "nomad-stack"
 }
 
+variable "cluster_name" {
+  type    = string
+  default = "nomad-stack"
+}
+
+variable "associate_public_ip_address" {
+  type    = bool
+  default = true
+}
+
+variable "key_name" {
+  type    = string
+  default = "nomad-stack"
+}
 
 // PORTS
 
@@ -78,7 +94,7 @@ variable "whitelist_ip" {
   default = "0.0.0.0/0"
 }
 
-// == ALB ==
+// ALB
 
 variable "base_amis" {
   type = map(any)
@@ -91,31 +107,18 @@ variable "base_amis" {
   description = "The id of the machine image (AMI) to use for the server. Ubuntu 20.04 LTS AMD 64"
 }
 
-variable "key_name" {
-  type    = string
-  default = "nomad-stack"
-}
-
-variable "server_instance_type" {
-  type    = string
-  default = "t2.small"
-}
-
-variable "client_instance_type" {
-  type    = string
-  default = "t2.small"
-}
+// SERVER ASG
 
 variable "desired_servers" {
   type    = number
   default = 1
 }
 
-variable "desired_clients" {
-  type    = number
-  default = 1
-}
-
+/*
+  Nomad should have one, three, or five servers by default.
+  Three is recommended for most production setups.
+  One is viable but does not allow for a high availibility raft cluster.
+*/
 variable "max_servers" {
   type    = number
   default = 3
@@ -126,17 +129,34 @@ variable "min_servers" {
   default = 1
 }
 
-variable "cluster_name" {
+variable "server_instance_type" {
   type    = string
-  default = "nomad-stack"
+  default = "t2.small"
 }
 
-variable "associate_public_ip_address" {
-  type    = bool
-  default = true
+variable "desired_clients" {
+  type    = number
+  default = 2
 }
 
-// == SERVER DATA ==
+// == CLIENT ASG ==
+
+variable "max_clients" {
+  type    = number
+  default = 10
+}
+
+variable "min_clients" {
+  type    = number
+  default = 1
+}
+
+variable "client_instance_type" {
+  type    = string
+  default = "t2.small"
+}
+
+// == SERVER & CLIENT DATA ==
 
 variable "retry_join" {
   type = map(any)

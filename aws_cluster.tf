@@ -171,8 +171,8 @@ resource "aws_autoscaling_group" "servers" {
 
 resource "aws_autoscaling_group" "clients" {
   desired_capacity = var.desired_clients
-  max_size         = var.max_servers
-  min_size         = var.min_servers
+  max_size         = var.max_clients
+  min_size         = var.min_clients
 
   launch_configuration = aws_launch_configuration.client_launch.name
   vpc_zone_identifier  = aws_subnet.public.*.id
